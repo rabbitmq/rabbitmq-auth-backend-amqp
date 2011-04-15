@@ -76,6 +76,7 @@ init([]) ->
     {ok, X} = application:get_env(exchange),
     case open(direct, params()) of
         {ok, Conn, Ch} ->
+            erlang:monitor(process, Ch),
             #'confirm.select_ok'{} =
                 amqp_channel:call(Ch, #'confirm.select'{}),
             amqp_channel:register_confirm_handler(Ch, self()),
@@ -126,10 +127,16 @@ handle_call(_Req, _From, State) ->
 handle_cast(_C, State) ->
     {noreply, State}.
 
+handle_info({'DOWN', _Ref, process, _Ch, Reason}, State) ->
+    {stop, {channel_down, Reason}, State};
+
 handle_info(_I, State) ->
     {noreply, State}.
 
-terminate(_, _) -> ok.
+terminate(_, #state{connection = Conn,
+                    channel    = Ch}) ->
+    ensure_closed(Conn, Ch),
+    ok.
 
 code_change(_, State, _) -> {ok, State}.
 
