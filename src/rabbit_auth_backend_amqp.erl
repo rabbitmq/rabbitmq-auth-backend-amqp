@@ -75,6 +75,10 @@ check_resource_access(#user{username = Username},
 init([]) ->
     case open(direct, #amqp_params{}) of
         {ok, Conn, Ch} ->
+            #'confirm.select_ok'{} =
+                amqp_channel:call(Ch, #'confirm.select'{}),
+            amqp_channel:register_confirm_handler(Ch, self()),
+            amqp_channel:register_return_handler(Ch, self()),
             #'exchange.declare_ok'{} =
                 amqp_channel:call(
                   Ch, #'exchange.declare'{exchange = ?EXCH,
@@ -157,14 +161,23 @@ rpc(Query, #state{channel        = Ch,
                        reply_to       = Q,
                        correlation_id = CId},
     amqp_channel:cast(Ch, #'basic.publish'{exchange    = ?EXCH,
-                                           routing_key = <<>>},
+                                           routing_key = <<>>,
+                                           mandatory   = true},
                       #amqp_msg{props   = Props,
                                 payload = <<>>}),
     receive
-        {#'basic.deliver'{},
-         #amqp_msg{props = #'P_basic'{correlation_id = CId},
-                   payload = Payload}} ->
-            Payload
+        {#'basic.return'{}, _} ->
+            receive
+                #'basic.ack'{} -> ok
+            end,
+            {error, rpc_server_not_listening};
+        #'basic.ack'{} ->
+            receive
+                {#'basic.deliver'{},
+                 #amqp_msg{props = #'P_basic'{correlation_id = CId},
+                           payload = Payload}} ->
+                    Payload
+            end
     end.
 
 bool_rpc(Query, State) ->
