@@ -6,6 +6,8 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
 import java.io.IOException;
+import java.net.ConnectException;
+import java.util.Date;
 
 /**
  *
@@ -17,9 +19,21 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         try {
-            Connection conn = FACTORY.newConnection();
-            Channel ch = conn.createChannel();
-            new AuthServer(new ExampleAuthBackend(), ch, EXCHANGE).mainloop();
+            while (true) {
+                System.out.print(new Date() + " Connecting...");
+                try {
+                    Connection conn = FACTORY.newConnection();
+                    Channel ch = conn.createChannel();
+                    System.out.println(" done");
+
+                    new AuthServer(new ExampleAuthBackend(), ch, EXCHANGE).mainloop();
+                    System.out.println(new Date() + " Connection died");
+                }
+                catch (ConnectException e) {
+                    System.out.println(" failed");
+                }
+                Thread.sleep(1000);
+            }
 
         } catch (Exception ex) {
             System.err.println("Main thread caught exception: " + ex);
