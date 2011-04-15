@@ -1,5 +1,5 @@
 %% -*- erlang -*-
-{application, rabbit_auth_backend_amqp,
+{application, rabbitmq_auth_backend_amqp,
  [{description, "RabbitMQ AMQP Authentication Backend"},
   {vsn, "%%VSN%%"},
   {modules, [rabbit_auth_backend_amqp_app]},

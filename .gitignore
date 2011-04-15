@@ -1,6 +1,6 @@
 *~
 ebin/*.beam
 ebin/*.app
-build/deps
+build/
 dist
 examples/rabbitmq-auth-backend-java/rabbitmq-auth-backend-java.iml
