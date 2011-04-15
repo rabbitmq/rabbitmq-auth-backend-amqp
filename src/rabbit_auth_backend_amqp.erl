@@ -30,9 +30,9 @@
          code_change/3]).
 
 -define(SERVER, ?MODULE).
--define(EXCH,   <<"amqp-auth">>).
 
--record(state, {connection, channel, reply_queue, correlation_id = 0}).
+-record(state, {connection, channel, exchange, reply_queue,
+                correlation_id = 0}).
 
 %%--------------------------------------------------------------------
 
@@ -73,7 +73,8 @@ check_resource_access(#user{username = Username},
 %%--------------------------------------------------------------------
 
 init([]) ->
-    case open(direct, #amqp_params{}) of
+    {ok, X} = application:get_env(exchange),
+    case open(direct, params()) of
         {ok, Conn, Ch} ->
             #'confirm.select_ok'{} =
                 amqp_channel:call(Ch, #'confirm.select'{}),
@@ -81,7 +82,7 @@ init([]) ->
             amqp_channel:register_return_handler(Ch, self()),
             #'exchange.declare_ok'{} =
                 amqp_channel:call(
-                  Ch, #'exchange.declare'{exchange = ?EXCH,
+                  Ch, #'exchange.declare'{exchange = X,
                                           type     = <<"fanout">>}),
             #'queue.declare_ok'{queue = Q} =
                 amqp_channel:call(Ch, #'queue.declare'{exclusive = true}),
@@ -91,6 +92,7 @@ init([]) ->
                                        self()),
             {ok, #state{connection  = Conn,
                         channel     = Ch,
+                        exchange    = X,
                         reply_queue = Q}};
         E ->
             {stop, E}
@@ -155,12 +157,13 @@ ensure_closed(Ch) ->
 
 rpc(Query, #state{channel        = Ch,
                   reply_queue    = Q,
+                  exchange       = X,
                   correlation_id = Id}) ->
     CId = list_to_binary(integer_to_list(Id)),
     Props = #'P_basic'{headers        = table(Query),
                        reply_to       = Q,
                        correlation_id = CId},
-    amqp_channel:cast(Ch, #'basic.publish'{exchange    = ?EXCH,
+    amqp_channel:cast(Ch, #'basic.publish'{exchange    = X,
                                            routing_key = <<>>,
                                            mandatory   = true},
                       #amqp_msg{props   = Props,
@@ -198,3 +201,13 @@ table_row({K, V}) ->
 
 bin(A) when is_atom(A)   -> list_to_binary(atom_to_list(A));
 bin(B) when is_binary(B) -> B.
+
+%%--------------------------------------------------------------------
+
+params() ->
+    {ok, VHost} = application:get_env(vhost),
+    {ok, Username} = application:get_env(username),
+    {ok, Password} = application:get_env(password),
+    #amqp_params{username     = Username,
+                 password     = Password,
+                 virtual_host = VHost}.

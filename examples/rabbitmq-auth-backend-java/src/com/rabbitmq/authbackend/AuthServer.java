@@ -15,10 +15,10 @@ import java.util.Map;
 public class AuthServer extends RpcServer {
     private AuthBackend authBackend;
 
-    public AuthServer(AuthBackend authBackend, Channel channel) throws IOException {
+    public AuthServer(AuthBackend authBackend, Channel channel, String exchangeName) throws IOException {
         super(channel);
         this.authBackend = authBackend;
-        channel.queueBind(getQueueName(), "amqp-auth", "");
+        channel.queueBind(getQueueName(), exchangeName, "");
     }
 
     public byte[] handleCall(QueueingConsumer.Delivery request,

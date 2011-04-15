@@ -5,5 +5,8 @@
   {modules, [rabbit_auth_backend_amqp_app]},
   {registered, []},
   {mod, {rabbit_auth_backend_amqp_app, []}},
-  {env, [] },
+  {env, [{exchange, <<"authentication">>},
+         {vhost,    <<"/">>},
+         {username, <<"guest">>},
+         {password, <<"guest">>}] },
   {applications, [kernel, stdlib, rabbit, amqp_client]}]}.

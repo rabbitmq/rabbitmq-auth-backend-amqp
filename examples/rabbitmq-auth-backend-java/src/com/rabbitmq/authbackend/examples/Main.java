@@ -11,12 +11,15 @@ import java.io.IOException;
  *
  */
 public class Main {
+    private static final ConnectionFactory FACTORY = new ConnectionFactory();
+    private static final String EXCHANGE = "authentication";
+
     public static void main(String[] args) throws IOException {
+
         try {
-            ConnectionFactory factory = new ConnectionFactory();
-            Connection conn = factory.newConnection();
+            Connection conn = FACTORY.newConnection();
             Channel ch = conn.createChannel();
-            new AuthServer(new ExampleAuthBackend(), ch).mainloop();
+            new AuthServer(new ExampleAuthBackend(), ch, EXCHANGE).mainloop();
 
         } catch (Exception ex) {
             System.err.println("Main thread caught exception: " + ex);
