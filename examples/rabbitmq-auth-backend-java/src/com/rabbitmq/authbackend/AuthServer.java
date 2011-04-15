@@ -10,7 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 /**
- *
+ * Simple RPC server that unpacks arguments and defers to an AuthBackend
  */
 public class AuthServer extends RpcServer {
     private AuthBackend authBackend;
