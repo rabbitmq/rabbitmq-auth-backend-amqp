@@ -17,7 +17,6 @@ public class Main {
             Connection conn = factory.newConnection();
             Channel ch = conn.createChannel();
             new AuthServer(new ExampleAuthBackend(), ch).mainloop();
-            System.out.println("Auth server listening");
 
         } catch (Exception ex) {
             System.err.println("Main thread caught exception: " + ex);
