@@ -4,6 +4,8 @@ package com.rabbitmq.authbackend;
  * A Java-ish representation of the RabbitMQ authentication backend API
  */
 public interface AuthBackend {
+    public LoginResult login(String username);
+
     public LoginResult login(String username,
                              String password);
 

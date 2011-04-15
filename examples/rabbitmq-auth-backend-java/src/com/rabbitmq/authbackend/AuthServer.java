@@ -28,9 +28,11 @@ public class AuthServer extends RpcServer {
         String action = get("action", headers);
 
         if (action.equals("login")) {
-            return bytes(
-                    authBackend.login(get("username", headers),
-                                      get("password", headers)).toString().toLowerCase());
+            String username = get("username", headers);
+            String password = get("password", headers);
+            LoginResult res = password == null ? authBackend.login(username) :
+                                                 authBackend.login(username, password);
+            return bytes(res.toString().toLowerCase());
         }
         else if (action.equals("check_vhost")) {
             return bool(authBackend.checkVhost(
@@ -55,7 +57,8 @@ public class AuthServer extends RpcServer {
     }
 
     private String get(String key, Map<String, Object> headers) {
-        return headers.get(key).toString();
+        Object o = headers.get(key);
+        return o == null ? null : o.toString();
     }
 
     private byte[] bytes(String s) {

@@ -10,6 +10,14 @@ import com.rabbitmq.authbackend.VHostPermission;
  *
  */
 public class ExampleAuthBackend implements AuthBackend {
+    public LoginResult login(String username) {
+        if (username.equals("smacmullen.eng.vmware.com")) {
+            return LoginResult.ACCEPTED;
+        }
+
+        return LoginResult.REFUSED;
+    }
+
     public LoginResult login(String username,
                              String password) {
         if (username.equals("simon") && password.equals("simon")) {

@@ -8,8 +8,8 @@ authorisation server over RPC-over-AMQP.
 As with all authentication plugins, this one requires rabbitmq-server
 2.3.1 or later.
 
-Note: it's at an early stage of development, although it's
-conceptually very simple.
+Note: it's at an early stage of development, and could be made rather
+more robust.
 
 # Requirements
 

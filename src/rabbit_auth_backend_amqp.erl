@@ -45,14 +45,8 @@ start_link() ->
 
 %%--------------------------------------------------------------------
 
-check_user_login(Username, []) ->
-    gen_server:call(?SERVER, {login, Username}, infinity);
-
-check_user_login(Username, [{password, Password}]) ->
-    gen_server:call(?SERVER, {login, Username, Password}, infinity);
-
 check_user_login(Username, AuthProps) ->
-    exit({unknown_auth_props, Username, AuthProps}).
+    gen_server:call(?SERVER, {login, Username, AuthProps}, infinity).
 
 check_vhost_access(#user{username = Username}, VHost, Permission) ->
     gen_server:call(?SERVER, {check_vhost, [{username,   Username},
@@ -99,13 +93,9 @@ init([]) ->
             {stop, E}
     end.
 
-%%handle_call({login, Username}, _From, State) ->
-%%    with_ldap(fun(LDAP) -> do_login(Username, LDAP, State) end, State);
-
-handle_call({login, Username, Password}, _From, State) ->
+handle_call({login, Username, AuthProps}, _From, State) ->
     Res = case rpc([{action,   login},
-                    {username, Username},
-                    {password, Password}], State) of
+                    {username, Username}] ++ AuthProps, State) of
               <<"refused">>  -> {refused, "Denied by AMQP plugin", []};
               {error, _} = E -> E;
               Resp           -> {ok, #user{username     = Username,
@@ -161,6 +151,8 @@ ensure_closed(Ch) ->
     catch amqp_channel:close(Ch).
 
 %%--------------------------------------------------------------------
+
+%% TODO don't block while logging in!
 
 rpc(Query, #state{channel        = Ch,
                   reply_queue    = Q,
