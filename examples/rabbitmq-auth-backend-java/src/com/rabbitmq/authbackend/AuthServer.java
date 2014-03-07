@@ -37,8 +37,7 @@ public class AuthServer extends RpcServer {
         else if (action.equals("check_vhost")) {
             return bool(authBackend.checkVhost(
                     get("username", headers),
-                    get("vhost", headers),
-                    VHostPermission.valueOf(getU("permission", headers))));
+                    get("vhost", headers)));
         }
         else if (action.equals("check_resource")) {
             return bool(authBackend.checkResource(

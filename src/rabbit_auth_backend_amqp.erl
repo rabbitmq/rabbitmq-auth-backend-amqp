@@ -18,10 +18,9 @@
 
 -include_lib("amqp_client/include/amqp_client.hrl").
 -behaviour(rabbit_auth_backend).
--include_lib("rabbit_common/include/rabbit_auth_backend_spec.hrl").
 
 -export([description/0]).
--export([check_user_login/2, check_vhost_access/3, check_resource_access/3]).
+-export([check_user_login/2, check_vhost_access/2, check_resource_access/3]).
 
 -behaviour(gen_server).
 
@@ -48,10 +47,9 @@ start_link() ->
 check_user_login(Username, AuthProps) ->
     gen_server:call(?SERVER, {login, Username, AuthProps}, infinity).
 
-check_vhost_access(#user{username = Username}, VHost, Permission) ->
-    gen_server:call(?SERVER, {check_vhost, [{username,   Username},
-                                            {vhost,      VHost},
-                                            {permission, Permission}]},
+check_vhost_access(#user{username = Username}, VHost) ->
+    gen_server:call(?SERVER, {check_vhost, [{username, Username},
+                                            {vhost,    VHost}]},
                     infinity).
 
 check_resource_access(#user{username = Username},
@@ -68,7 +66,7 @@ check_resource_access(#user{username = Username},
 
 init([]) ->
     {ok, X} = application:get_env(exchange),
-    case open(direct, params()) of
+    case open(params()) of
         {ok, Conn, Ch} ->
             erlang:monitor(process, Ch),
             #'confirm.select_ok'{} =
@@ -98,8 +96,10 @@ handle_call({login, Username, AuthProps}, _From, State) ->
                     {username, Username}] ++ AuthProps, State) of
               <<"refused">>  -> {refused, "Denied by AMQP plugin", []};
               {error, _} = E -> E;
-              Resp           -> {ok, #user{username     = Username,
-                                           is_admin     = Resp =:= <<"admin">>,
+              Resp           -> Tags0 = string:tokens(binary_to_list(Resp),","),
+                                Tags = [list_to_atom(T) || T <- Tags0],
+                                {ok, #user{username     = Username,
+                                           tags         = Tags,
                                            auth_backend = ?MODULE,
                                            impl         = none}}
           end,
@@ -132,8 +132,8 @@ code_change(_, State, _) -> {ok, State}.
 
 %%--------------------------------------------------------------------
 
-open(Type, Params) ->
-    case amqp_connection:start(Type, Params) of
+open(Params) ->
+    case amqp_connection:start(Params) of
         {ok, Conn} -> case amqp_connection:open_channel(Conn) of
                           {ok, Ch} -> erlang:monitor(process, Ch),
                                       {ok, Conn, Ch};
@@ -206,7 +206,5 @@ bin(B) when is_binary(B) -> B.
 params() ->
     {ok, VHost} = application:get_env(vhost),
     {ok, Username} = application:get_env(username),
-    {ok, Password} = application:get_env(password),
-    #amqp_params{username     = Username,
-                 password     = Password,
-                 virtual_host = VHost}.
+    #amqp_params_direct{username     = Username,
+                        virtual_host = VHost}.

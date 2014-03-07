@@ -10,8 +10,7 @@ public interface AuthBackend {
                              String password);
 
     boolean checkVhost(String username,
-                       String vhost,
-                       VHostPermission permission);
+                       String vhost);
 
     boolean checkResource(String username,
                           String vhost,

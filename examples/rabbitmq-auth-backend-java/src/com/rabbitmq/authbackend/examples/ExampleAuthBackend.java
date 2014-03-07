@@ -4,32 +4,33 @@ import com.rabbitmq.authbackend.AuthBackend;
 import com.rabbitmq.authbackend.LoginResult;
 import com.rabbitmq.authbackend.ResourcePermission;
 import com.rabbitmq.authbackend.ResourceType;
-import com.rabbitmq.authbackend.VHostPermission;
 
 /**
  *
  */
 public class ExampleAuthBackend implements AuthBackend {
+    private static final LoginResult ACCEPTED = new LoginResult(true, new String[]{"administrator"});
+    private static final LoginResult REFUSED = new LoginResult(false);
+
     public LoginResult login(String username) {
         if (username.equals("smacmullen.eng.vmware.com")) {
-            return LoginResult.ACCEPTED;
+            return ACCEPTED;
         }
 
-        return LoginResult.REFUSED;
+        return REFUSED;
     }
 
     public LoginResult login(String username,
                              String password) {
         if (username.equals("simon") && password.equals("simon")) {
-            return LoginResult.ACCEPTED;
+            return ACCEPTED;
         }
 
-        return LoginResult.REFUSED;
+        return REFUSED;
     }
 
     public boolean checkVhost(String username,
-                              String vhost,
-                              VHostPermission permission) {
+                              String vhost) {
         return vhost.equals("/");
     }
 

@@ -4,3 +4,5 @@ ebin/*.app
 build/
 dist
 examples/rabbitmq-auth-backend-java/rabbitmq-auth-backend-java.iml
+cover/*
+erl_crash.dump
