@@ -5,8 +5,7 @@ authentication (determining who can log in) and authorisation
 (determining what permissions they have) by connecting to an
 authorisation server over RPC-over-AMQP.
 
-As with all authentication plugins, this one requires rabbitmq-server
-2.3.1 or later.
+The plugin has been tested against RabbitMQ 3.2.x. It will probably work with other recent versions.
 
 Note: it's at an early stage of development, and could be made rather
 more robust.
@@ -44,7 +43,6 @@ A minimal configuration file might look like:
                                  rabbit_auth_backend_amqp]}]},
       {rabbitmq_auth_backend_amqp,
        [{username, <<"guest">>},
-        {password, <<"guest">>},
         {vhost,    <<"/">>},
         {exchange, <<"authentication">>}]}
     ].
@@ -58,3 +56,5 @@ authentication server framework based around the
 `com.rabbitmq.authbackend.AuthBackend` interface with a very trivial
 implementation in `com.rabbitmq.authbackend.examples` (which will
 authenticate "simon" / "simon").
+
+You probably need to look at the example to see how responses work.
