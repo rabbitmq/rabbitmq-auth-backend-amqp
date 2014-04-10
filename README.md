@@ -10,7 +10,12 @@ The plugin has been tested against RabbitMQ 3.2.x. It will probably work with ot
 Note: it's at an early stage of development, and could be made rather
 more robust.
 
-# Requirements
+# Downloading
+
+You can download a pre-built binary of this plugin from
+http://www.rabbitmq.com/community-plugins.html.
+
+# Building
 
 You can build and install it like any other plugin (see
 [the plugin development guide](http://www.rabbitmq.com/plugin-development.html)).
