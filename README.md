@@ -54,6 +54,11 @@ A minimal configuration file might look like:
 
 Authentication requests will be packed into the headers of incoming messages.
 
+You can also specify a `timeout` config item. This should be an
+integer number of milliseconds to wait for a response from the RPC
+server, or `infinity` to wait forever (the default). If the RPC server
+does not respond in time, the request for access is denied.
+
 # Example
 
 In `examples/rabbitmq-auth-backend-java` there's a Java based

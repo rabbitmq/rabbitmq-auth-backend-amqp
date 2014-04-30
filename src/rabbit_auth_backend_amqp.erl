@@ -31,7 +31,7 @@
 -define(SERVER, ?MODULE).
 
 -record(state, {connection, channel, exchange, reply_queue,
-                correlation_id = 0}).
+                correlation_id = 0, timeout}).
 
 %%--------------------------------------------------------------------
 
@@ -66,6 +66,7 @@ check_resource_access(#user{username = Username},
 
 init([]) ->
     {ok, X} = application:get_env(exchange),
+    {ok, Timeout} = application:get_env(timeout),
     case open(params()) of
         {ok, Conn, Ch} ->
             erlang:monitor(process, Ch),
@@ -86,7 +87,8 @@ init([]) ->
             {ok, #state{connection  = Conn,
                         channel     = Ch,
                         exchange    = X,
-                        reply_queue = Q}};
+                        reply_queue = Q,
+                        timeout     = Timeout}};
         E ->
             {stop, E}
     end.
@@ -154,10 +156,10 @@ ensure_closed(Ch) ->
 
 %% TODO don't block while logging in!
 
-rpc(Query, #state{channel        = Ch,
-                  reply_queue    = Q,
-                  exchange       = X,
-                  correlation_id = Id}) ->
+rpc(Query, State = #state{channel        = Ch,
+                          reply_queue    = Q,
+                          exchange       = X,
+                          correlation_id = Id}) ->
     CId = list_to_binary(integer_to_list(Id)),
     Props = #'P_basic'{headers        = table(Query),
                        reply_to       = Q,
@@ -174,12 +176,20 @@ rpc(Query, #state{channel        = Ch,
             end,
             {error, rpc_server_not_listening};
         #'basic.ack'{} ->
-            receive
-                {#'basic.deliver'{},
-                 #amqp_msg{props = #'P_basic'{correlation_id = CId},
-                           payload = Payload}} ->
-                    Payload
+            await_reply(CId, State)
+    end.
+
+await_reply(CId, State = #state{timeout = Timeout}) ->
+    receive
+        {#'basic.deliver'{},
+         #amqp_msg{props = #'P_basic'{correlation_id = CId2},
+                   payload = Payload}} ->
+            case CId2 of
+                CId -> Payload;
+                _   -> await_reply(CId, State)
             end
+    after Timeout ->
+            {error, rpc_timeout}
     end.
 
 bool_rpc(Query, State) ->

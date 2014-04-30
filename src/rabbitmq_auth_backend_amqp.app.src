@@ -7,5 +7,6 @@
   {mod, {rabbit_auth_backend_amqp_app, []}},
   {env, [{exchange, <<"authentication">>},
          {vhost,    <<"/">>},
-         {username, <<"guest">>}] },
+         {username, <<"guest">>},
+         {timeout,  infinity}] },
   {applications, [kernel, stdlib, rabbit, amqp_client]}]}.
