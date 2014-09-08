@@ -30,10 +30,15 @@ public class LoginResult {
     }
 
     public String toString() {
-        String r = "" + success;
-        for (int i = 0; i < tags.length; i++) {
-            r += "," + tags[i];
+        if (success) {
+            String r = "";
+            for (int i = 0; i < tags.length; i++) {
+                r += tags[i] + ",";
+            }
+            return r;
         }
-        return r;
+        else {
+            return "refused";
+        }
     }
 }
