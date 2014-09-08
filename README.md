@@ -52,7 +52,16 @@ A minimal configuration file might look like:
         {exchange, <<"authentication">>}]}
     ].
 
-Authentication requests will be packed into the headers of incoming messages.
+Authentication requests will be packed into the headers of incoming
+messages. There are three types of request: `login`, `check_vhost` and
+`check_resource`. Responses should be returned in the message
+body. Responses to `login` requests should be "refused" if login is
+unsuccessful or a comma-separated list of tags for the user if login
+is successful. Responses to the other types should be the words
+"allow" or "deny".
+
+It will probably be a good idea to look at the Java example for more
+details.
 
 You can also specify a `timeout` config item. This should be an
 integer number of milliseconds to wait for a response from the RPC
@@ -66,5 +75,3 @@ authentication server framework based around the
 `com.rabbitmq.authbackend.AuthBackend` interface with a very trivial
 implementation in `com.rabbitmq.authbackend.examples` (which will
 authenticate "simon" / "simon").
-
-You probably need to look at the example to see how responses work.
