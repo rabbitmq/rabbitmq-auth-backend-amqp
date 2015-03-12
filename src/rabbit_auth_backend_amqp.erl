@@ -17,10 +17,14 @@
 -module(rabbit_auth_backend_amqp).
 
 -include_lib("amqp_client/include/amqp_client.hrl").
--behaviour(rabbit_auth_backend).
+
+-behaviour(rabbit_authn_backend).
+-behaviour(rabbit_authz_backend).
 
 -export([description/0]).
--export([check_user_login/2, check_vhost_access/2, check_resource_access/3]).
+
+-export([user_login_authentication/2, user_login_authorization/1,
+         check_vhost_access/3, check_resource_access/3]).
 
 -behaviour(gen_server).
 
@@ -44,15 +48,21 @@ start_link() ->
 
 %%--------------------------------------------------------------------
 
-check_user_login(Username, AuthProps) ->
+user_login_authentication(Username, AuthProps) ->
     gen_server:call(?SERVER, {login, Username, AuthProps}, infinity).
 
-check_vhost_access(#user{username = Username}, VHost) ->
+user_login_authorization(Username) ->
+    case user_login_authentication(Username, []) of
+        {ok, #auth_user{impl = Impl}} -> {ok, Impl};
+        Else                          -> Else
+    end.
+
+check_vhost_access(#auth_user{username = Username}, VHost, _Sock) ->
     gen_server:call(?SERVER, {check_vhost, [{username, Username},
                                             {vhost,    VHost}]},
                     infinity).
 
-check_resource_access(#user{username = Username},
+check_resource_access(#auth_user{username = Username},
                       #resource{virtual_host = VHost, kind = Type, name = Name},
                       Permission) ->
     gen_server:call(?SERVER, {check_resource, [{username,   Username},
@@ -100,10 +110,9 @@ handle_call({login, Username, AuthProps}, _From, State) ->
               {error, _} = E -> E;
               Resp           -> Tags0 = string:tokens(binary_to_list(Resp),","),
                                 Tags = [list_to_atom(T) || T <- Tags0],
-                                {ok, #user{username     = Username,
-                                           tags         = Tags,
-                                           auth_backend = ?MODULE,
-                                           impl         = none}}
+                                {ok, #auth_user{username = Username,
+                                                tags     = Tags,
+                                                impl     = none}}
           end,
     {reply, Res, incr(State)};
 
