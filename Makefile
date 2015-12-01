@@ -12,3 +12,12 @@ ERLANG_MK_COMMIT = rabbitmq-tmp
 
 include rabbitmq-components.mk
 include erlang.mk
+
+# --------------------------------------------------------------------
+# Testing.
+# --------------------------------------------------------------------
+
+WITH_BROKER_TEST_MAKEVARS := \
+	RABBITMQ_CONFIG_FILE=$(CURDIR)/etc/rabbit-test
+WITH_BROKER_TEST_SCRIPTS := \
+	$(CURDIR)/test/test.sh

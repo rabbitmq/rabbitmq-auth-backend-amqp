@@ -1,14 +1,16 @@
-#!/bin/sh -e
+#!/bin/sh
+
+set -e
 
 DIR=$(dirname $0)
 SERVER_SRC=${DIR}/../examples/rabbitmq-auth-backend-java/src/
-JAVA_AMQP_DIR=${DIR}/../../rabbitmq-java-client/
+JAVA_AMQP_DIR=${DEPS_DIR}/rabbitmq_java_client/
 JAVA_AMQP_CLASSES=${JAVA_AMQP_DIR}/build/classes/
 BUILD=${DIR}/build
 CP=${JAVA_AMQP_CLASSES}:${SERVER_SRC}
 RUN_CP=${JAVA_AMQP_CLASSES}:${BUILD}
 
-make -C ${JAVA_AMQP_DIR} all
+${MAKE:-make} -C ${JAVA_AMQP_DIR} all
 
 mkdir -p ${BUILD}
 javac -cp ${CP} -d ${BUILD} ${SERVER_SRC}/com/rabbitmq/authbackend/*.java
@@ -18,7 +20,7 @@ PID=$!
 echo PID is $PID
 sleep 5
 set +e
-java -cp ${RUN_CP} com.rabbitmq.authbackend.examples.TestMain 
+java -cp ${RUN_CP} com.rabbitmq.authbackend.examples.TestMain
 RES=$?
 kill ${PID}
 set -e

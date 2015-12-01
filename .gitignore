@@ -10,3 +10,5 @@
 /plugins/
 
 /rabbitmq_auth_backend_amqp.d
+
+/test/build
