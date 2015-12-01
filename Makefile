@@ -1,6 +1,7 @@
 PROJECT = rabbitmq_auth_backend_amqp
 
-TEST_DEPS = amqp_client rabbit rabbitmq_java_client
+DEPS = amqp_client rabbit
+TEST_DEPS = rabbitmq_java_client
 
 DEP_PLUGINS = rabbit_common/mk/rabbitmq-plugin.mk
 
