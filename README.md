@@ -43,6 +43,17 @@ authentication requests to.
 
 A minimal configuration file might look like:
 
+For `rabbitmq.conf`:
+
+    auth_backends.1 = internal
+    auth_backends.2 = amqp
+
+    auth_amqp.username = guest
+    auth_amqp.vhost    = /
+    auth_amqp.exchange = authentication
+
+For `rabbitmq.config` (prior to 3.7.0) or `advanced.config`:
+
     [
       {rabbit, [{auth_backends, [rabbit_auth_backend_internal,
                                  rabbit_auth_backend_amqp]}]},
