@@ -5,24 +5,24 @@ authentication (determining who can log in) and authorisation
 (determining what permissions they have) by connecting to an
 authorisation server over RPC-over-AMQP.
 
-The plugin has been tested against RabbitMQ 3.2.x. It will probably work with other recent versions.
+The plugin requires RabbitMQ 3.2.x or a later version.
 
 Note: it's at an early stage of development, and could be made rather
 more robust.
 
-# Downloading
+## Downloading
 
 You can download a pre-built binary of this plugin from
-http://www.rabbitmq.com/community-plugins.html.
+the [Community Plugins page](http://www.rabbitmq.com/community-plugins.html).
 
-# Building
+## Building
 
 You can build and install it like any other plugin (see
 [the plugin development guide](http://www.rabbitmq.com/plugin-development.html)).
 
 This plugin depends on the Erlang client.
 
-# Enabling the plugin
+## Enabling the plugin
 
 To enable the plugin, set the value of the `auth_backends` configuration item
 for the `rabbit` application to include `rabbit_auth_backend_amqp`.
@@ -36,23 +36,21 @@ probably use the internal database:
       [{auth_backends, [rabbit_auth_backend_internal, rabbit_auth_backend_amqp]}]
      }].
 
-# Configuring the plugin
+## Configuring the plugin
 
 You need to configure the plugin to know which exchange to publish
 authentication requests to.
 
-A minimal configuration file might look like:
-
-For `rabbitmq.conf`:
+Below is a minimal `rabbitmq.conf` example (currently only in master):
 
     auth_backends.1 = internal
     auth_backends.2 = amqp
 
-    auth_amqp.username = guest
-    auth_amqp.vhost    = /
-    auth_amqp.exchange = authentication
+    rabbit_auth_backend_amqp.username = guest
+    rabbit_auth_backend_amqp.vhost    = /
+    rabbit_auth_backend_amqp.exchange = authentication
 
-For `rabbitmq.config` (prior to 3.7.0) or `advanced.config`:
+Or, in the classic config format (`rabbitmq.config`, prior to 3.7.0) or `advanced.config`:
 
     [
       {rabbit, [{auth_backends, [rabbit_auth_backend_internal,
@@ -79,7 +77,7 @@ integer number of milliseconds to wait for a response from the RPC
 server, or `infinity` to wait forever (the default). If the RPC server
 does not respond in time, the request for access is denied.
 
-# Example
+## Example App (in Java)
 
 In `examples/rabbitmq-auth-backend-java` there's a Java based
 authentication server framework based around the
