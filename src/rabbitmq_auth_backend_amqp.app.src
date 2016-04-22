@@ -9,4 +9,5 @@
          {vhost,    <<"/">>},
          {username, <<"guest">>},
          {timeout,  infinity}] },
+  {broker_version_requirements, []},
   {applications, [kernel, stdlib, rabbit, amqp_client]}]}.
