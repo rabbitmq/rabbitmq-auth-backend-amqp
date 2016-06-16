@@ -31,4 +31,4 @@ init([]) ->
     {ok, {{one_for_one,3,10},
           [{rabbit_auth_backend_amqp,
             {rabbit_auth_backend_amqp, start_link, []},
-            transient, ?MAX_WAIT, worker, [rabbit_auth_backend_amqp]}]}}.
+            transient, ?WORKER_WAIT, worker, [rabbit_auth_backend_amqp]}]}}.
