@@ -9,8 +9,6 @@ JAVA_AMQP_CLASSES=${JAVA_AMQP_DIR}/build/classes/
 CP=${JAVA_AMQP_CLASSES}:${SERVER_SRC}
 RUN_CP=${JAVA_AMQP_CLASSES}:${BUILD}
 
-${MAKE:-make} -C ${JAVA_AMQP_DIR} all
-
 mkdir -p ${BUILD}
 javac -cp ${CP} -d ${BUILD} ${SERVER_SRC}/com/rabbitmq/authbackend/*.java
 javac -cp ${CP} -d ${BUILD} ${SERVER_SRC}/com/rabbitmq/authbackend/examples/*.java
