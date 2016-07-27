@@ -78,8 +78,7 @@ init_per_testcase(with_backend = Testcase, Config) ->
                                                      {"AMQP_PORT", integer_to_list(AmqpPort)}
                                                     ]}]),
     Config1 = rabbit_ct_helpers:set_config(Config, {backend_port, Port}),
-    % wait for backend to start
-    timer:sleep(5000),
+    wait_for_backend(Config),
     rabbit_ct_helpers:testcase_started(Config1, Testcase).
 
 end_per_testcase(with_backend = Testcase, Config) ->
@@ -109,6 +108,23 @@ print_port_data(Port, Acc) ->
             print_port_data(Port, Acc ++ Out)
     after 5000 ->
             ct:pal(?LOW_IMPORTANCE, "backend: ~s", [Acc])
+    end.
+
+wait_for_backend(Config) ->
+    Source = #resource{
+      virtual_host = <<"/">>,
+      kind = exchange,
+      name = <<"authentication">>},
+    Bindings = rabbit_ct_broker_helpers:rpc(Config, 0,
+      rabbit_binding, list_for_source, [Source]),
+    case Bindings of
+        [] ->
+            timer:sleep(200),
+            wait_for_backend(Config);
+        _ ->
+            %% Once there is a queue bound to the `authentication`
+            %% exchange, we assume it's the test backend.
+            ok
     end.
 
 %% -------------------------------------------------------------------
