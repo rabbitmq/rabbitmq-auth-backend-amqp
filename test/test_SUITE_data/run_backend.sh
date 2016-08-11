@@ -5,7 +5,7 @@ set -e
 DIR=$(dirname $0)
 SERVER_SRC=${DIR}/../../examples/rabbitmq-auth-backend-java/src/
 JAVA_AMQP_DIR=${DEPS_DIR}/rabbitmq_java_client/
-JAVA_AMQP_CLASSES=${JAVA_AMQP_DIR}/build/classes/
+JAVA_AMQP_CLASSES=${JAVA_AMQP_DIR}/target/classes/
 CP=${JAVA_AMQP_CLASSES}:${SERVER_SRC}
 RUN_CP=${JAVA_AMQP_CLASSES}:${BUILD}
 
