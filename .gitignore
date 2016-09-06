@@ -11,4 +11,4 @@
 
 /rabbitmq_auth_backend_amqp.d
 
-/test/build
+/test/test_SUITE_data/lib
