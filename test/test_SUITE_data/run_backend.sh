@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -ex
 
 DIR=$(dirname $0)
 SERVER_SRC=${DIR}/../../examples/rabbitmq-auth-backend-java/src/

@@ -64,51 +64,61 @@ init_per_group(_, Config) -> Config.
 end_per_group(_, Config) -> Config.
 
 init_per_testcase(with_backend = Testcase, Config) ->
-    PrivDir = ?config(priv_dir, Config),
-    DataDir = ?config(data_dir, Config),
-    BuildDir = filename:join([PrivDir, "build"]),
-    ok = filelib:ensure_dir(filename:join(BuildDir, "dummy")),
-    AmqpPort = rabbit_ct_broker_helpers:get_node_config(Config, 0, tcp_port_amqp),
-    Script = filename:join([DataDir, "run_backend.sh"]),
-    ct:pal(?LOW_IMPORTANCE, "starting port", []),
-    Port = erlang:open_port({spawn, Script}, [use_stdio,
-                                              stderr_to_stdout,
-                                              exit_status,
-                                              {env, [{"BUILD", BuildDir},
-                                                     {"AMQP_PORT", integer_to_list(AmqpPort)}
-                                                    ]}]),
-    Config1 = rabbit_ct_helpers:set_config(Config, {backend_port, Port}),
-    wait_for_backend(Config),
-    rabbit_ct_helpers:testcase_started(Config1, Testcase).
+    rabbit_ct_helpers:testcase_started(Config, Testcase),
+    start_backend(Config).
 
 end_per_testcase(with_backend = Testcase, Config) ->
-    Port = ?config(backend_port, Config),
-    print_port_data(Port, ""),
-    case erlang:port_info(Port, os_pid) of
-        {os_pid, OsPid} ->
-            ct:pal(?LOW_IMPORTANCE, "backend os pid ~p", [OsPid]),
-            KillCmd =
-                case os:type() of
-                    {unix, _} -> ["kill", integer_to_list(OsPid)];
-                    {win32, _} -> ["taskkill", "/PID", integer_to_list(OsPid)]
-                end,
-            KillRes = rabbit_ct_helpers:exec(KillCmd, []),
-            ct:pal(?LOW_IMPORTANCE, "kill: ~p", [KillRes]);
-        _ -> ok
-    end,
-    true = erlang:port_close(Port),
+    stop_backend(Config),
     rabbit_ct_helpers:testcase_finished(Config, Testcase).
 
-print_port_data(Port, Acc) ->
+start_backend(Config) ->
+    Parent = self(),
+    Child = spawn(fun() -> start_backend(Config, Parent) end),
+    Config1 = rabbit_ct_helpers:set_config(Config, {backend_pid, Child}),
+    wait_for_backend(Config1).
+
+start_backend(Config, Parent) ->
+    Script = filename:join([?config(data_dir, Config), "run_backend.sh"]),
+    BuildDir = filename:join([?config(priv_dir, Config), "build"]),
+    ok = filelib:ensure_dir(filename:join(BuildDir, "dummy")),
+    AmqpPort = rabbit_ct_broker_helpers:get_node_config(Config, 0,
+      tcp_port_amqp),
+    Port = erlang:open_port({spawn_executable, Script}, [
+        use_stdio,
+        stderr_to_stdout,
+        exit_status,
+        {env, [
+            {"BUILD", BuildDir},
+            {"AMQP_PORT", integer_to_list(AmqpPort)}
+          ]}]),
+    backend_loop(Port, Parent, "").
+
+backend_loop(Port, Parent, Output) ->
     receive
+        {Port, {data, Line}} ->
+            backend_loop(Port, Parent, Output ++ Line);
         {Port, {exit_status, X}} ->
-            ct:pal(?LOW_IMPORTANCE, "port exited with ~p", [X]),
-            ct:pal(?LOW_IMPORTANCE, "backend: ~s", [Acc]);
-        {Port, {data, Out}} ->
-            print_port_data(Port, Acc ++ Out)
-    after 5000 ->
-            ct:pal(?LOW_IMPORTANCE, "backend: ~s", [Acc])
+            print_port_data(Output),
+            ct:pal(?LOW_IMPORTANCE, "Backend exited with ~p",
+              [integer_to_list(X)]),
+            Parent ! {backend_exited, X};
+        stop ->
+            print_port_data(Output),
+            {os_pid, Pid} = erlang:port_info(Port, os_pid),
+            ct:pal(?LOW_IMPORTANCE, "Stopping backend (system PID: ~p)...", [Pid]),
+            KillCmd = case os:type() of
+                {unix, _}  -> ["kill", integer_to_list(Pid)];
+                {win32, _} -> ["taskkill", "/PID", integer_to_list(Pid)]
+            end,
+            rabbit_ct_helpers:exec(KillCmd, []),
+            backend_loop(Port, Parent, "")
+    after 200 ->
+            print_port_data(Output),
+            backend_loop(Port, Parent, "")
     end.
+
+print_port_data([])     -> ok;
+print_port_data(Output) -> ct:pal(?LOW_IMPORTANCE, "Backend:~n~s", [Output]).
 
 wait_for_backend(Config) ->
     Source = #resource{
@@ -119,11 +129,24 @@ wait_for_backend(Config) ->
       rabbit_binding, list_for_source, [Source]),
     case Bindings of
         [] ->
-            timer:sleep(200),
-            wait_for_backend(Config);
+            receive
+                {backend_exited, X} ->
+                    Code = integer_to_list(X),
+                    exit("Failed to start backend; exited with code " ++ Code)
+            after 200 ->
+                    wait_for_backend(Config)
+            end;
         _ ->
             %% Once there is a queue bound to the `authentication`
             %% exchange, we assume it's the test backend.
+            Config
+    end.
+
+stop_backend(Config) ->
+    Child = ?config(backend_pid, Config),
+    Child ! stop,
+    receive
+        {backend_exited, _} ->
             ok
     end.
 
