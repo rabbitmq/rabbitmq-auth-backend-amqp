@@ -1,4 +1,19 @@
 PROJECT = rabbitmq_auth_backend_amqp
+PROJECT_DESCRIPTION = RabbitMQ AMQP Authentication Backend
+PROJECT_MOD = rabbit_auth_backend_amqp_app
+
+define PROJECT_ENV
+[
+	    {exchange, <<"authentication">>},
+	    {vhost,    <<"/">>},
+	    {username, <<"guest">>},
+	    {timeout,  infinity}
+	  ]
+endef
+
+define PROJECT_APP_EXTRA_KEYS
+	{broker_version_requirements, ["3.6.0", "3.7.0"]}
+endef
 
 DEPS = rabbit_common rabbit amqp_client
 TEST_DEPS = rabbitmq_ct_helpers rabbitmq_ct_client_helpers
