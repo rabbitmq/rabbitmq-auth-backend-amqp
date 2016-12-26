@@ -45,7 +45,8 @@ public class AuthServer extends RpcServer {
                     get("vhost", headers),
                     get("name", headers),
                     ResourceType.valueOf(getU("resource", headers)),
-                    ResourcePermission.valueOf(getU("permission", headers))));
+                    ResourcePermission.valueOf(getU("permission", headers)),
+                    get("routing_key", headers)));
         }
 
         throw new RuntimeException("Unexpected action " + action);

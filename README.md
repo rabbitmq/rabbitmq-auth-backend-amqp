@@ -83,4 +83,6 @@ In `examples/rabbitmq-auth-backend-java` there's a Java based
 authentication server framework based around the
 `com.rabbitmq.authbackend.AuthBackend` interface with a very trivial
 implementation in `com.rabbitmq.authbackend.examples` (which will
-authenticate "simon" / "simon").
+authenticate "simon" / "simon"). This implementation also checks
+the routing key starts by `a` when publishing to a topic exchange
+(a.k.a topic authorisation TODO add link to topic authorisation).

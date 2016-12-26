@@ -33,6 +33,7 @@
          code_change/3]).
 
 -define(SERVER, ?MODULE).
+-define(CHECK_RESOURCE_ACCESS_HEADERS, [username, vhost, resource, name, permission]).
 
 -record(state, {connection, channel, exchange, reply_queue,
                 correlation_id = 0, timeout}).
@@ -63,16 +64,27 @@ check_vhost_access(#auth_user{username = Username}, VHost, _Sock) ->
                     infinity).
 
 check_resource_access(#auth_user{username = Username},
-                      #resource{virtual_host = VHost, kind = Type, name = Name},
+                      #resource{virtual_host = VHost, kind = Type, name = Name, options = Options},
                       Permission) ->
+    OptionsHeaders = resource_options_as_headers(Options),
     gen_server:call(?SERVER, {check_resource, [{username,   Username},
                                                {vhost,      VHost},
                                                {resource,   Type},
                                                {name,       Name},
-                                               {permission, Permission}]},
+                                               {permission, Permission}] ++ OptionsHeaders},
                     infinity).
 
 %%--------------------------------------------------------------------
+
+resource_options_as_headers(Options) when is_map(Options) ->
+    % filter options that would erase fixed parameters
+    [{rabbit_data_coercion:to_atom(Key), maps:get(Key, Options)}
+        || Key <- maps:keys(Options),
+        lists:member(
+            rabbit_data_coercion:to_atom(Key),
+            ?CHECK_RESOURCE_ACCESS_HEADERS) =:= false];
+resource_options_as_headers(_) ->
+    [].
 
 init([]) ->
     {ok, X} = application:get_env(exchange),

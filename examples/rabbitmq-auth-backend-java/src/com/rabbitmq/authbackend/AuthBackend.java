@@ -16,5 +16,6 @@ public interface AuthBackend {
                           String vhost,
                           String resourceName,
                           ResourceType resourceType,
-                          ResourcePermission permission);
+                          ResourcePermission permission,
+                          String routingKey);
 }

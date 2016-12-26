@@ -38,7 +38,12 @@ public class ExampleAuthBackend implements AuthBackend {
                                  String vhost,
                                  String resourceName,
                                  ResourceType resourceType,
-                                 ResourcePermission permission) {
-        return true;
+                                 ResourcePermission permission,
+                                 String routingKey) {
+        if(resourceType == ResourceType.TOPIC) {
+            return routingKey.startsWith("a");
+        } else {
+            return true;
+        }
     }
 }
