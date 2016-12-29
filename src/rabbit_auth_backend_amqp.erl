@@ -24,7 +24,7 @@
 -export([description/0]).
 
 -export([user_login_authentication/2, user_login_authorization/1,
-         check_vhost_access/3, check_resource_access/3]).
+         check_vhost_access/3, check_resource_access/3, check_topic_access/4]).
 
 -behaviour(gen_server).
 
@@ -64,26 +64,37 @@ check_vhost_access(#auth_user{username = Username}, VHost, _Sock) ->
                     infinity).
 
 check_resource_access(#auth_user{username = Username},
-                      #resource{virtual_host = VHost, kind = Type, name = Name, options = Options},
+                      #resource{virtual_host = VHost, kind = Type, name = Name},
                       Permission) ->
-    OptionsHeaders = resource_options_as_headers(Options),
     gen_server:call(?SERVER, {check_resource, [{username,   Username},
                                                {vhost,      VHost},
                                                {resource,   Type},
                                                {name,       Name},
-                                               {permission, Permission}] ++ OptionsHeaders},
+                                               {permission, Permission}]},
+                    infinity).
+
+check_topic_access(#auth_user{username = Username},
+                   #resource{virtual_host = VHost, kind = topic = Type, name = Name},
+                   Permission,
+                   Context) ->
+    OptionsHeaders = context_as_headers(Context),
+    gen_server:call(?SERVER, {check_topic, [{username,   Username},
+                                            {vhost,      VHost},
+                                            {resource,   Type},
+                                            {name,       Name},
+                                            {permission, Permission}] ++ OptionsHeaders},
                     infinity).
 
 %%--------------------------------------------------------------------
 
-resource_options_as_headers(Options) when is_map(Options) ->
+context_as_headers(Options) when is_map(Options) ->
     % filter options that would erase fixed parameters
     [{rabbit_data_coercion:to_atom(Key), maps:get(Key, Options)}
         || Key <- maps:keys(Options),
         lists:member(
             rabbit_data_coercion:to_atom(Key),
             ?CHECK_RESOURCE_ACCESS_HEADERS) =:= false];
-resource_options_as_headers(_) ->
+context_as_headers(_) ->
     [].
 
 init([]) ->
@@ -133,6 +144,9 @@ handle_call({check_vhost, Args}, _From, State) ->
 
 handle_call({check_resource, Args}, _From, State) ->
     {reply, bool_rpc([{action, check_resource} | Args], State), State};
+
+handle_call({check_topic, Args}, _From, State) ->
+    {reply, bool_rpc([{action, check_topic} | Args], State), State};
 
 handle_call(_Req, _From, State) ->
     {reply, unknown_request, State}.

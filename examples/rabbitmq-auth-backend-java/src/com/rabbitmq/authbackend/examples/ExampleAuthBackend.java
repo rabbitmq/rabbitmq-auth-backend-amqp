@@ -38,12 +38,16 @@ public class ExampleAuthBackend implements AuthBackend {
                                  String vhost,
                                  String resourceName,
                                  ResourceType resourceType,
-                                 ResourcePermission permission,
-                                 String routingKey) {
-        if(resourceType == ResourceType.TOPIC) {
-            return routingKey.startsWith("a");
-        } else {
-            return true;
-        }
+                                 ResourcePermission permission) {
+        return true;
+    }
+
+    public boolean checkTopic(String username,
+                              String vhost,
+                              String resourceName,
+                              ResourceType resourceType,
+                              ResourcePermission permission,
+                              String routingKey) {
+        return routingKey.startsWith("a");
     }
 }

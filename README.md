@@ -62,8 +62,8 @@ Or, in the classic config format (`rabbitmq.config`, prior to 3.7.0) or `advance
     ].
 
 Authentication requests will be packed into the headers of incoming
-messages. There are three types of request: `login`, `check_vhost` and
-`check_resource`. Responses should be returned in the message
+messages. There are four types of request: `login`, `check_vhost`,
+`check_resource` and `check_topic`. Responses should be returned in the message
 body. Responses to `login` requests should be "refused" if login is
 unsuccessful or a comma-separated list of tags for the user if login
 is successful. Responses to the other types should be the words

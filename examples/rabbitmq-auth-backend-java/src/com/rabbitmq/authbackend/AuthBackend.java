@@ -16,6 +16,12 @@ public interface AuthBackend {
                           String vhost,
                           String resourceName,
                           ResourceType resourceType,
+                          ResourcePermission permission);
+
+    boolean checkTopic(String username,
+                          String vhost,
+                          String resourceName,
+                          ResourceType resourceType,
                           ResourcePermission permission,
                           String routingKey);
 }
