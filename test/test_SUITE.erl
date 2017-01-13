@@ -30,7 +30,8 @@ all() ->
 groups() ->
     [
      {non_parallel_tests, [], [
-                               with_backend
+                               with_backend,
+                               topic_authorisation
                               ]}
     ].
 
@@ -63,11 +64,11 @@ init_per_group(_, Config) -> Config.
 
 end_per_group(_, Config) -> Config.
 
-init_per_testcase(with_backend = Testcase, Config) ->
+init_per_testcase(Testcase, Config) ->
     rabbit_ct_helpers:testcase_started(Config, Testcase),
     start_backend(Config).
 
-end_per_testcase(with_backend = Testcase, Config) ->
+end_per_testcase(Testcase, Config) ->
     stop_backend(Config),
     rabbit_ct_helpers:testcase_finished(Config, Testcase).
 
@@ -170,3 +171,31 @@ with_backend(Config) ->
                                                    port = AmqpPort,
                                                    username = <<"karl">>,
                                                    password = <<"bananas">>}).
+
+topic_authorisation(Config) ->
+    %% backend lets pass if routing key starts by 'a'
+    %% should pass
+    test_publish(Config, <<"a.b.c">>, ok),
+    %% should not pass
+    test_publish(Config, <<"b.c">>, fail),
+    ok.
+
+
+test_publish(Config, RoutingKey, ExpectedResult) ->
+    AmqpPort = rabbit_ct_broker_helpers:get_node_config(Config, 0, tcp_port_amqp),
+    Host = rabbit_ct_helpers:get_config(Config, rmq_hostname),
+    {ok, Connection} = amqp_connection:start(#amqp_params_network{host = Host,
+        port = AmqpPort,
+        username = <<"simon">>,
+        password = <<"simon">>}),
+    {ok, Channel} = amqp_connection:open_channel(Connection),
+    ActualResult = try
+                       Publish = #'basic.publish'{exchange = <<"amq.topic">>, routing_key = RoutingKey},
+                       amqp_channel:cast(Channel, Publish, #amqp_msg{payload = <<"foobar">>}),
+                       amqp_channel:call(Channel, #'basic.qos'{prefetch_count = 0}),
+                       ok
+                   catch exit:_ -> fail
+                   after
+                       amqp_connection:close(Connection)
+                   end,
+    ExpectedResult = ActualResult.

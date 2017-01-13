@@ -47,6 +47,15 @@ public class AuthServer extends RpcServer {
                     ResourceType.valueOf(getU("resource", headers)),
                     ResourcePermission.valueOf(getU("permission", headers))));
         }
+        else if (action.equals("check_topic")) {
+            return bool(authBackend.checkTopic(
+                get("username", headers),
+                get("vhost", headers),
+                get("name", headers),
+                ResourceType.valueOf(getU("resource", headers)),
+                ResourcePermission.valueOf(getU("permission", headers)),
+                get("routing_key", headers)));
+        }
 
         throw new RuntimeException("Unexpected action " + action);
     }
