@@ -85,4 +85,5 @@ authentication server framework based around the
 implementation in `com.rabbitmq.authbackend.examples` (which will
 authenticate "simon" / "simon"). This implementation also checks
 the routing key starts by `a` when publishing to a topic exchange
+or consuming from a topic.
 (a.k.a. [topic authorisation](http://www.rabbitmq.com/access-control.html#topic-authorisation)).
