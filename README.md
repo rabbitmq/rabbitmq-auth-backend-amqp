@@ -46,9 +46,9 @@ Below is a minimal `rabbitmq.conf` example (currently only in master):
     auth_backends.1 = internal
     auth_backends.2 = amqp
 
-    rabbit_auth_backend_amqp.username = guest
-    rabbit_auth_backend_amqp.vhost    = /
-    rabbit_auth_backend_amqp.exchange = authentication
+    auth_amqp.username = guest
+    auth_amqp.vhost    = /
+    auth_amqp.exchange = authentication
 
 Or, in the classic config format (`rabbitmq.config`, prior to 3.7.0) or `advanced.config`:
 
