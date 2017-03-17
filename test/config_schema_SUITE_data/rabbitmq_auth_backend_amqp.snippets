@@ -1,0 +1,12 @@
+[{auth_backend_amqp,
+  "auth_backends.1 = amqp
+   auth_amqp.username = user
+   auth_amqp.vhost    = my_vhost
+   auth_amqp.exchange = exchange_name
+   auth_amqp.timeout  = 100",
+  [{rabbit,[{auth_backends,[rabbit_auth_backend_amqp]}]},
+   {rabbitmq_auth_backend_amqp,[{username,<<"user">>},
+                                {vhost,<<"my_vhost">>},
+                                {exchange,<<"exchange_name">>},
+                                {timeout,100}]}],
+  [rabbitmq_auth_backend_amqp]}].
