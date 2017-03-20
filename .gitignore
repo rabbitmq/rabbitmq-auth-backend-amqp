@@ -12,3 +12,4 @@
 /rabbitmq_auth_backend_amqp.d
 
 /test/test_SUITE_data/lib
+/test/config_schema_SUITE_data/schema
