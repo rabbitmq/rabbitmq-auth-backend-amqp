@@ -250,7 +250,7 @@ table_row({MapKey, Map}) when is_map(Map) ->
     [begin
         KeyBin = rabbit_data_coercion:to_binary(Key),
         KeyWithPrefix = <<KeyPrefix/binary, KeyBin/binary>>,
-        table_row({KeyWithPrefix,rabbit_data_coercion:to_binary(Value)})
+        table_row({KeyWithPrefix, rabbit_data_coercion:to_binary(Value)})
      end
          || {Key, Value} <- maps:to_list(Map)];
 table_row({K, V}) ->
