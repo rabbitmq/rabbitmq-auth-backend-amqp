@@ -32,6 +32,9 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
          code_change/3]).
 
+% for testing
+-export([table/1]).
+
 -define(SERVER, ?MODULE).
 -define(CHECK_RESOURCE_ACCESS_HEADERS, [username, vhost, resource, name, permission]).
 
@@ -238,8 +241,18 @@ incr(State = #state{correlation_id = Id}) ->
     State#state{correlation_id = Id + 1}.
 
 table(Query) ->
-    [table_row(Row) || Row <- Query].
+    lists:flatten([table_row(Row) || Row <- Query]).
 
+table_row({MapKey, Map}) when is_map(Map) ->
+    MapKeyBin = bin(MapKey),
+    Delimiter = <<".">>,
+    KeyPrefix = <<MapKeyBin/binary, Delimiter/binary>>,
+    [begin
+        KeyBin = rabbit_data_coercion:to_binary(Key),
+        KeyWithPrefix = <<KeyPrefix/binary, KeyBin/binary>>,
+        table_row({KeyWithPrefix, rabbit_data_coercion:to_binary(Value)})
+     end
+         || {Key, Value} <- maps:to_list(Map)];
 table_row({K, V}) ->
     {bin(K), longstr, bin(V)}.
 
