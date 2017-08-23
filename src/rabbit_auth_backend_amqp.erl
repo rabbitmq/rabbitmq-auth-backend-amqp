@@ -257,7 +257,8 @@ table_row({K, V}) ->
     {bin(K), longstr, bin(V)}.
 
 bin(A) when is_atom(A)   -> list_to_binary(atom_to_list(A));
-bin(B) when is_binary(B) -> B.
+bin(B) when is_binary(B) -> B;
+bin(C) when is_list(C) -> list_to_binary(C).
 
 %%--------------------------------------------------------------------
 
