@@ -217,8 +217,8 @@ table(Query) ->
 table_row({K, V}) ->
     {bin(K), longstr, bin(V)}.
 
-bin(A) when is_atom(A)   -> list_to_binary(atom_to_list(A));
-bin(B) when is_binary(B) -> B.
+bin(Term) ->
+    rabbit_data_coercion:to_binary(Term).
 
 %%--------------------------------------------------------------------
 
