@@ -9,6 +9,7 @@ addons:
   apt:
     packages:
       - awscli
+      - maven
       - xsltproc
 cache:
   apt: true
