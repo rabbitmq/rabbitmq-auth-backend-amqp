@@ -7,7 +7,7 @@ authorisation server over RPC-over-AMQP.
 
 The plugin requires RabbitMQ 3.2.x or a later version.
 
-Note: it's at an early stage of development, and could be made rather
+Note: this is a rarely used plugin, and could be made rather
 more robust.
 
 ## Downloading
