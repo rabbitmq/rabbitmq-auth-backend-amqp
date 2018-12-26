@@ -4,19 +4,19 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.rabbitmq</groupId>
-  <artifactId>amqp-client</artifactId>
-  <version>3.7.0-SNAPSHOT</version>
+  <artifactId>rabbitmq-auth-backend-amqp-tests</artifactId>
+  <version>5.5.1</version>
   <packaging>jar</packaging>
 
-  <name>RabbitMQ AMQP authentication backend plugin dependencies list</name>
-  <description>Fetches test dependencies only.</description>
-  <url>http://www.rabbitmq.com</url>
+  <name>rabbitmq-auth-backend-amqp-tests</name>
+  <description>Fetches test dependencies</description>
+  <url>https://www.rabbitmq.com</url>
 
   <dependencies>
     <dependency>
       <groupId>com.rabbitmq</groupId>
       <artifactId>amqp-client</artifactId>
-      <version>3.6.5</version>
+      <version>5.5.1</version>
     </dependency>
   </dependencies>
 </project>
