@@ -13,12 +13,12 @@ more robust.
 ## Downloading
 
 You can download a pre-built binary of this plugin from
-the [Community Plugins page](http://www.rabbitmq.com/community-plugins.html).
+the [Community Plugins page](https://www.rabbitmq.com/community-plugins.html).
 
 ## Building
 
 You can build and install it like any other plugin (see
-[the plugin development guide](http://www.rabbitmq.com/plugin-development.html)).
+[the plugin development guide](https://www.rabbitmq.com/plugin-development.html)).
 
 This plugin depends on the Erlang client.
 
@@ -86,4 +86,4 @@ implementation in `com.rabbitmq.authbackend.examples` (which will
 authenticate "simon" / "simon"). This implementation also checks
 the routing key starts by `a` when publishing to a topic exchange
 or consuming from a topic.
-(a.k.a. [topic authorisation](http://www.rabbitmq.com/access-control.html#topic-authorisation)).
+(a.k.a. [topic authorisation](https://www.rabbitmq.com/access-control.html#topic-authorisation)).
