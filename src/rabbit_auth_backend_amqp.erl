@@ -61,9 +61,10 @@ user_login_authorization(Username, _AuthProps) ->
         Else                          -> Else
     end.
 
-check_vhost_access(#auth_user{username = Username}, VHost, _Sock) ->
+check_vhost_access(#auth_user{username = Username}, VHost, #{peeraddr := Address}) ->
     gen_server:call(?SERVER, {check_vhost, [{username, Username},
-                                            {vhost,    VHost}]},
+                                            {vhost,    VHost},
+                                            {ip,       Address}]},
                     infinity).
 
 check_resource_access(#auth_user{username = Username},
