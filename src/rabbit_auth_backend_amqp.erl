@@ -64,7 +64,7 @@ user_login_authorization(Username, _AuthProps) ->
 check_vhost_access(#auth_user{username = Username}, VHost, #{peeraddr := Address}) ->
     gen_server:call(?SERVER, {check_vhost, [{username, Username},
                                             {vhost,    VHost},
-                                            {ip,       Address}]},
+                                            {ip,       inet:ntoa(Address)}]},
                     infinity).
 
 check_resource_access(#auth_user{username = Username},
