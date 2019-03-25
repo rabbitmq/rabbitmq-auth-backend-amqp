@@ -61,10 +61,10 @@ user_login_authorization(Username, _AuthProps) ->
         Else                          -> Else
     end.
 
-check_vhost_access(#auth_user{username = Username}, VHost, #{peeraddr := Address}) ->
+check_vhost_access(#auth_user{username = Username}, VHost, #{peeraddr := PeerAddr}) ->
     gen_server:call(?SERVER, {check_vhost, [{username, Username},
                                             {vhost,    VHost},
-                                            {ip,       inet:ntoa(Address)}]},
+                                            {ip,       parse_peeraddr(PeerAddr)}]},
                     infinity).
 
 check_resource_access(#auth_user{username = Username},
@@ -267,3 +267,11 @@ params() ->
     {ok, Username} = application:get_env(username),
     #amqp_params_direct{username     = Username,
                         virtual_host = VHost}.
+
+parse_peeraddr(PeerAddr) ->
+    handle_inet_ntoa_peeraddr(inet:ntoa(PeerAddr), PeerAddr).
+
+handle_inet_ntoa_peeraddr({error, einval}, PeerAddr) ->
+    rabbit_data_coercion:to_list(PeerAddr);
+handle_inet_ntoa_peeraddr(PeerAddrStr, _PeerAddr0) ->
+    PeerAddrStr.
