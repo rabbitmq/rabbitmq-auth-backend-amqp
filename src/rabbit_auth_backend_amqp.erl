@@ -24,7 +24,7 @@
 -export([description/0]).
 
 -export([user_login_authentication/2, user_login_authorization/2,
-         check_vhost_access/3, check_resource_access/3, check_topic_access/4]).
+         check_vhost_access/3, check_resource_access/4, check_topic_access/4]).
 
 -behaviour(gen_server).
 
@@ -55,26 +55,30 @@ start_link() ->
 user_login_authentication(Username, AuthProps) ->
     gen_server:call(?SERVER, {login, Username, AuthProps}, infinity).
 
-user_login_authorization(Username, _AuthProps) ->
-    case user_login_authentication(Username, []) of
+user_login_authorization(Username, AuthProps) ->
+    case user_login_authentication(Username, AuthProps) of
         {ok, #auth_user{impl = Impl}} -> {ok, Impl};
         Else                          -> Else
     end.
 
-check_vhost_access(#auth_user{username = Username}, VHost, #{peeraddr := PeerAddr}) ->
+check_vhost_access(#auth_user{username = Username}, VHost, AuthzData = #{peeraddr := PeerAddr}) ->
+    AuthzData1 = maps:remove(peeraddr, AuthzData),
+    OptionsHeaders = context_as_headers(AuthzData1),
     gen_server:call(?SERVER, {check_vhost, [{username, Username},
                                             {vhost,    VHost},
-                                            {ip,       parse_peeraddr(PeerAddr)}]},
+                                            {ip,       parse_peeraddr(PeerAddr)}] ++ OptionsHeaders},
                     infinity).
 
 check_resource_access(#auth_user{username = Username},
                       #resource{virtual_host = VHost, kind = Type, name = Name},
-                      Permission) ->
+                      Permission,
+                      AuthzContext) ->
+    OptionsHeaders = context_as_headers(AuthzContext),
     gen_server:call(?SERVER, {check_resource, [{username,   Username},
                                                {vhost,      VHost},
                                                {resource,   Type},
                                                {name,       Name},
-                                               {permission, Permission}]},
+                                               {permission, Permission}] ++ OptionsHeaders},
                     infinity).
 
 check_topic_access(#auth_user{username = Username},
