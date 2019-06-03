@@ -2,7 +2,7 @@ package com.rabbitmq.authbackend;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.Delivery;
 import com.rabbitmq.client.RpcServer;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class AuthServer extends RpcServer {
         channel.queueBind(getQueueName(), exchangeName, "");
     }
 
-    public byte[] handleCall(QueueingConsumer.Delivery request,
+    public byte[] handleCall(Delivery request,
                              AMQP.BasicProperties replyProperties)
     {
         Map<String, Object> headers = request.getProperties().getHeaders();
