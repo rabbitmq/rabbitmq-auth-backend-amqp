@@ -89,7 +89,6 @@ start_backend(Config, Parent) ->
         stderr_to_stdout,
         exit_status,
         {env, [
-            {"BUILD", BuildDir},
             {"AMQP_PORT", integer_to_list(AmqpPort)}
           ]}]),
     backend_loop(Port, Parent, "").

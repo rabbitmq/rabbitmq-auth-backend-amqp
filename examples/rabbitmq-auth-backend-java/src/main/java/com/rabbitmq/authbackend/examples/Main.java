@@ -19,7 +19,6 @@ public class Main {
     private static final AuthBackend BACKEND = new ExampleAuthBackend();
 
     public static void main(String[] args) throws IOException {
-
         FACTORY.setPort(Integer.parseInt(args[0]));
         try {
             while (true) {
