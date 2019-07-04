@@ -24,7 +24,8 @@
 -export([description/0]).
 
 -export([user_login_authentication/2, user_login_authorization/2,
-         check_vhost_access/3, check_resource_access/4, check_topic_access/4]).
+         check_vhost_access/3, check_resource_access/4, check_topic_access/4,
+         state_can_expire/0]).
 
 -behaviour(gen_server).
 
@@ -92,6 +93,8 @@ check_topic_access(#auth_user{username = Username},
                                             {name,       Name},
                                             {permission, Permission}] ++ OptionsHeaders},
                     infinity).
+
+state_can_expire() -> false.
 
 %%--------------------------------------------------------------------
 
