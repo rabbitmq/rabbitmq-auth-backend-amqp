@@ -6,8 +6,13 @@
 /deps/
 /doc/
 /ebin/
+/escript.lock
+/escript/
 /logs/
 /plugins/
+/plugins.lock
+/sbin/
+/sbin.lock
 
 /rabbitmq_auth_backend_amqp.d
 
