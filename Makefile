@@ -1,6 +1,7 @@
 PROJECT = rabbitmq_auth_backend_amqp
 PROJECT_DESCRIPTION = RabbitMQ AMQP Authentication Backend
 PROJECT_MOD = rabbit_auth_backend_amqp_app
+RABBITMQ_VERSION ?= v3.9.x
 
 define PROJECT_ENV
 [
@@ -12,7 +13,7 @@ define PROJECT_ENV
 endef
 
 define PROJECT_APP_EXTRA_KEYS
-	{broker_version_requirements, ["3.7.0", "3.8.0"]}
+	{broker_version_requirements, ["3.9.0"]}
 endef
 
 DEPS = rabbit_common rabbit amqp_client
@@ -28,4 +29,10 @@ ERLANG_MK_REPO = https://github.com/rabbitmq/erlang.mk.git
 ERLANG_MK_COMMIT = rabbitmq-tmp
 
 include rabbitmq-components.mk
+
+dep_amqp_client                = git_rmq-subfolder rabbitmq-erlang-client $(RABBITMQ_VERSION)
+dep_rabbit_common              = git_rmq-subfolder rabbitmq-common $(RABBITMQ_VERSION)
+dep_rabbit                     = git_rmq-subfolder rabbitmq-server $(RABBITMQ_VERSION)
+dep_rabbitmq_ct_client_helpers = git_rmq-subfolder rabbitmq-ct-client-helpers $(RABBITMQ_VERSION)
+dep_rabbitmq_ct_helpers        = git_rmq-subfolder rabbitmq-ct-helpers $(RABBITMQ_VERSION)
 include erlang.mk
