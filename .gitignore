@@ -4,8 +4,7 @@
 .sw?
 .tool-versions
 erl_crash.dump
-rabbitmq_auth_backend_ip_range.d
-
+rabbitmq_auth_backend_amqp.d/
 cover/
 deps/
 doc/
