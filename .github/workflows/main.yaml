@@ -2,24 +2,22 @@ name: CI
 on:
   pull_request:
     branches:
-      - 'master'
+      - 'main'
   push:
     branches:
-      - 'master'
+      - 'main'
 jobs:
   build-test:
     name: Build and test on Erlang/OTP ${{ matrix.otp-version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        otp-version: [23, 24]
+        otp-version: [24, 25]
     steps:
       - uses: actions/checkout@v3
       - uses: erlef/setup-beam@v1
         with:
           otp-version: ${{matrix.otp-version}}
-          elixir-version: 1.11.4
-      - name: Compile
-        run: make
-      - name: Test
-        run: make tests
+          elixir-version: 1.13.4
+      - run: make
+      - run: make tests
