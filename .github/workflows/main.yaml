@@ -20,6 +20,6 @@ jobs:
       - uses: erlef/setup-beam@v1
         with:
           otp-version: ${{matrix.otp-version}}
-          elixir-version: 1.16.0
+          elixir-version: 1.15.7
       - run: make
       - run: make tests
